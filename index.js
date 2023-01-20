@@ -8,23 +8,37 @@ const PORT = 3000;
 app.use(express.json());
 
 // 1- Crea el endpoint /users (GET) que devuelva todos los usuarios
+
 app.get('/users', (req, res) => {
   res.send(primaryObject)
   console.log("Llamando a la ruta get1")
 })
+
 // 2- Crea el endpoint /users/:username (GET) que devuelva un único usuario en base al username (si hubiera varios, devuelve solo el primero)
 
 app.get('/users/:username', (req, res) => {
   const username = req.params.username
   for (let i = 0; i < primaryObject.length; i++) {
-    if (primaryObject[i].firstName = username) {
+    if (primaryObject[i].firstName === username) {
       res.send(primaryObject[i])
       console.log("Llamando a la ruta get2")
-    } else {
+    }
+    if(i == (primaryObject.length-1) && primaryObject[i].firstName !== username) {
       res.send("El usuario no existe, comprueba si has escrito bien su nombre")
+    }
+
+    if(username === "total") {
+      res.send(`El total de usuarios en el sistema es ${primaryObject.length}`)
     }
   }
 })
+
+// 3- Crea el endpoint /users/total (GET) para devolver el total de usuarios
+
+// app.get('/users/total', (req, res) => {
+//   res.send(`El total de usuarios en el sistema es${primaryObject.length}`)
+//   console.log("Llamando a la ruta get3")
+// })
 
 
 app.listen(PORT, () => {
@@ -34,7 +48,7 @@ app.listen(PORT, () => {
 
 
 
-// Crea el endpoint /users/:username (GET) que devuelva un único usuario en base al username (si hubiera varios, devuelve solo el primero)
+
 // Crea el endpoint /users/total (GET) para devolver el total de usuarios
 // Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
 // Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
