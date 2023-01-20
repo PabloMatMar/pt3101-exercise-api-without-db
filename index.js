@@ -17,30 +17,38 @@ app.get('/users', (req, res) => {
 // 2- Crea el endpoint /users/:username (GET) que devuelva un único usuario en base al username (si hubiera varios, devuelve solo el primero)
 
 app.get('/users/:username', (req, res) => {
-  const username = req.params.username
+  const param = req.params.username;
+  let num = 0;
+  const arr = []
   for (let i = 0; i < primaryObject.length; i++) {
-    if (primaryObject[i].firstName === username) {
+    const nacion = primaryObject[i].address.country.split(' ').join('')
+    if (primaryObject[i].username === param) {
       res.send(primaryObject[i])
-      console.log("Llamando a la ruta get2")
+      num = i
+      // console.log("Llamando a ruta dame usuario por nombre")
     }
-    if(i == (primaryObject.length-1) && primaryObject[i].firstName !== username) {
-      res.send("El usuario no existe, comprueba si has escrito bien su nombre")
+    // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
+    else if (nacion.toLowerCase() == param || i === primaryObject.length - 1) {
+      if(nacion.toLowerCase() == param) {
+      arr.push({user: primaryObject[i]})
+      }
+      // console.log(arr)
+      if(i === primaryObject.length - 1) {
+        res.send(arr)
+        console.log("hola")
+      }
+      num = i
+    }
+    // 3- Crea el endpoint /users/total (GET) para devolver el total de usuarios
+    else if (param === "total") {
+      res.send(`El total de usuarios en el sistema es ${primaryObject.length}`)
     }
 
-    if(username === "total") {
-      res.send(`El total de usuarios en el sistema es ${primaryObject.length}`)
+    else if (i === primaryObject.length - 1 && primaryObject[num].username !== param && primaryObject[num].address.country !== param) {
+      res.send("El usuario no existe, comprueba si has escrito bien su nombre")
     }
   }
 })
-
-// 3- Crea el endpoint /users/total (GET) para devolver el total de usuarios
-
-// app.get('/users/total', (req, res) => {
-//   res.send(`El total de usuarios en el sistema es${primaryObject.length}`)
-//   console.log("Llamando a la ruta get3")
-// })
-
-
 app.listen(PORT, () => {
   console.info(`> Estoy arribísima en el puerto ${PORT}! ✨🦄`);
 });
@@ -49,7 +57,7 @@ app.listen(PORT, () => {
 
 
 
-// Crea el endpoint /users/total (GET) para devolver el total de usuarios
+
 // Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
 // Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
 // Crea el endpoint /users/:food (GET) para devolver todos los usuarios con una comida favorita en concreto a través de params
