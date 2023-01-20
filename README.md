@@ -1,6 +1,6 @@
 ## EJERCICIO
 
-### Antes de comenzar...
+### Antes de comenzar..
 
 - Instalación de paquetes (`npm i`)
 - Copia la información del fichero que actúa como persistente de la información (`npm run db`)
