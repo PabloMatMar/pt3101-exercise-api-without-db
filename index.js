@@ -11,15 +11,17 @@ app.use(express.json());
 
 app.get('/users', (req, res) => {
   res.send(primaryObject)
-  console.log("Llamando a la ruta get1")
+  console.log("Respondiendo a GET USERS")
 })
 
 app.get('/users/:username', (req, res) => {
+  //cambiar username de req.params por search
   const param = req.params.username;
   const arrNation = [];
   const arrVehicules = [];
+  const arrFood = [];
+  let num = 0;
   const { max, min } = req.query
-  console.log("*****GET ACTIVADA*****")
 
   for (let i = 0; i < primaryObject.length; i++) {
     const nation = primaryObject[i].address.country.split(' ').join('')
@@ -29,36 +31,62 @@ app.get('/users/:username', (req, res) => {
 
     if (primaryObject[i].username === param) {
       res.send(primaryObject[i])
+      num = 1;
+      console.log("Respondiendo a GET UNIC USER")
     }
 
     // 3- Crea el endpoint /users/total (GET) para devolver el total de usuarios
 
-    else if (param === "total") {
+    else if (i === 0 && param === "total") {
       res.send(`El total de usuarios en el sistema es ${primaryObject.length}`)
+      console.log("Respondiendo a GET TOTAL USERS")
+      num = 1;
     }
 
     //5  Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
 
-    else if (min <= numVehicles.length && numVehicles.length <= max && param === "vehicules" || i === primaryObject.length - 1 && param === "vehicules" ) {
+    else if (min <= numVehicles.length && numVehicles.length <= max && param === "vehicules" || i === primaryObject.length - 1 && param === "vehicules") {
       arrVehicules.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
       if (arrVehicules.length > 0 && i === primaryObject.length - 1) {
         res.send(arrVehicules)
-        console.log("Llamando a la ruta GET vehicules")
+        num = 1;
+        console.log("respondiendo a GET USERS FOR NUMBER OF VEHICULES")
       }
     }
 
+    //6- Crea el endpoint /users/:food (GET) para devolver todos los usuarios con una comida favorita en concreto a través de params
+    function checkFoods() {
+      for (let j = 0; j < primaryObject[i].favouritesFood.length; j++) {
+        if (param === primaryObject[i].favouritesFood[j].split(' ').join('').toLocaleLowerCase()) {
+          arrFood.push(primaryObject[i])
+
+        }
+        if (arrFood.length > 0 && i === primaryObject.length - 1) {
+          res.send(arrFood)
+          num = 1;
+          console.log("Respondiendo a GET FOOD")
+          return num
+        }
+      }
+    }
+    checkFoods()
+
+
+
     // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
 
-    else if (nation.toLowerCase() ===  param || i === primaryObject.length - 1) {
+    if (nation.toLowerCase() === param || i === primaryObject.length - 1 && num === 0) {
       if (nation.toLowerCase() === param) {
         arrNation.push({ user: primaryObject[i] })
       }
-      if (i === primaryObject.length - 1 /*&& arrNation.length > 0*/) {
+      if (i === primaryObject.length - 1) {
         if (arrNation.length > 0) {
           res.send(arrNation)
+          console.log("Respuesta a GET COUNTRY")
         }
         else {
           res.send("Busqueda no encontrada o mal realizada.")
+          console.log("Respondiendo con RESPUESTA NO ENCONTRADA")
         }
       }
     }
@@ -75,7 +103,7 @@ app.listen(PORT, () => {
 
 
 
-// Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
+
 // Crea el endpoint /users/:food (GET) para devolver todos los usuarios con una comida favorita en concreto a través de params
 // Crea el endpoint /foods (GET) para devolver una lista de todas las comidas registradas UNICAS de todos los usuarios
 // Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarios que tenga, al menos, un coche con los detalles pasados por query string (fuel, manufacturer y/o model. Si están los 3 se filtra por los 3, si falta alguno, se filtra solo por los que existen. Si no hay ninguno, se saca la información de los usuarios que NO TIENEN COCHES)
