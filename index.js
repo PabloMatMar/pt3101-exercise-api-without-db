@@ -98,41 +98,27 @@ app.get('/users/:search', (req, res) => {
     }
 
     //8 - Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarios que tenga, al menos, un coche con los detalles pasados por query string (fuel, manufacturer y/o model. Si están los 3 se filtra por los 3, si falta alguno, se filtra solo por los que existen. Si no hay ninguno, se saca la información de los usuarios que NO TIENEN COCHES)
+
+    if (cont === i && primaryObject[i].vehicles.length === 0) {
+      usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+      cont++
+    }
     for (let v = 0; v < primaryObject[i].vehicles.length; v++) {
-
       if (param === "vehicles") {
-
         if (cont === i) {
-
-
-          if (fuel === primaryObject[i].vehicles[v].fuel && manufacturer === primaryObject[i].vehicles[v].manufacturer && model === primaryObject[i].vehicles[v].model) {
-
-
+          if (fuel === primaryObject[i].vehicles[v].fuel.toLocaleLowerCase() && manufacturer === primaryObject[i].vehicles[v].manufacturer.toLocaleLowerCase() && model === primaryObject[i].vehicles[v].model.toLocaleLowerCase()) {
             usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
             cont++
-
-
           }
-          else if (fuel === primaryObject[i].vehicles[v].fuel || manufacturer === primaryObject[i].vehicles[v].manufacturer || model === primaryObject[i].vehicles[v].model) {
-
+          else if (fuel === primaryObject[i].vehicles[v].fuel.toLocaleLowerCase() || manufacturer === primaryObject[i].vehicles[v].manufacturer.toLocaleLowerCase() || model === primaryObject[i].vehicles[v].model.toLocaleLowerCase()) {
             usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
             cont++
-
           }
-          else if (!primaryObject[i].vehicles[0].fuel) {
-
-            usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
-            cont++
-
-
-          }
-
-          else if(cont===i && v === primaryObject[i].vehicles.length - 1) {
+          else if(cont===i && v === primaryObject[i].vehicles.length-1) {
             cont++
           }
         }
-
-        if (i === primaryObject.length - 1 && v === primaryObject[i].vehicles.length - 1) {
+        if (i === primaryObject.length - 1 && v === primaryObject[i].vehicles.length-1) {
           res.send(usersCars)
           num = 1
         }
