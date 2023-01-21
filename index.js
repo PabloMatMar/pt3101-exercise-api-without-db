@@ -14,41 +14,57 @@ app.get('/users', (req, res) => {
   console.log("Llamando a la ruta get1")
 })
 
-// 2- Crea el endpoint /users/:username (GET) que devuelva un único usuario en base al username (si hubiera varios, devuelve solo el primero)
-
 app.get('/users/:username', (req, res) => {
   const param = req.params.username;
-  let num = 0;
-  const arr = []
+  const arrNation = [];
+  const arrVehicules = [];
+  const { max, min } = req.query
+  console.log("*****GET ACTIVADA*****")
+
   for (let i = 0; i < primaryObject.length; i++) {
-    const nacion = primaryObject[i].address.country.split(' ').join('')
+    const nation = primaryObject[i].address.country.split(' ').join('')
+    const numVehicles = primaryObject[i].vehicles
+
+    // 2- Crea el endpoint /users/:username (GET) que devuelva un único usuario en base al username (si hubiera varios, devuelve solo el primero)
+
     if (primaryObject[i].username === param) {
       res.send(primaryObject[i])
-      num = i
-      // console.log("Llamando a ruta dame usuario por nombre")
     }
-    // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
-    else if (nacion.toLowerCase() == param || i === primaryObject.length - 1) {
-      if(nacion.toLowerCase() == param) {
-      arr.push({user: primaryObject[i]})
-      }
-      // console.log(arr)
-      if(i === primaryObject.length - 1) {
-        res.send(arr)
-        console.log("hola")
-      }
-      num = i
-    }
+
     // 3- Crea el endpoint /users/total (GET) para devolver el total de usuarios
+
     else if (param === "total") {
       res.send(`El total de usuarios en el sistema es ${primaryObject.length}`)
     }
 
-    else if (i === primaryObject.length - 1 && primaryObject[num].username !== param && primaryObject[num].address.country !== param) {
-      res.send("El usuario no existe, comprueba si has escrito bien su nombre")
+    //5  Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
+
+    else if (min <= numVehicles.length && numVehicles.length <= max && param === "vehicules" || i === primaryObject.length - 1 && param === "vehicules" ) {
+      arrVehicules.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+      if (arrVehicules.length > 0 && i === primaryObject.length - 1) {
+        res.send(arrVehicules)
+        console.log("Llamando a la ruta GET vehicules")
+      }
+    }
+
+    // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
+
+    else if (nation.toLowerCase() ===  param || i === primaryObject.length - 1) {
+      if (nation.toLowerCase() === param) {
+        arrNation.push({ user: primaryObject[i] })
+      }
+      if (i === primaryObject.length - 1 /*&& arrNation.length > 0*/) {
+        if (arrNation.length > 0) {
+          res.send(arrNation)
+        }
+        else {
+          res.send("Busqueda no encontrada o mal realizada.")
+        }
+      }
     }
   }
 })
+
 app.listen(PORT, () => {
   console.info(`> Estoy arribísima en el puerto ${PORT}! ✨🦄`);
 });
@@ -58,7 +74,7 @@ app.listen(PORT, () => {
 
 
 
-// Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
+
 // Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
 // Crea el endpoint /users/:food (GET) para devolver todos los usuarios con una comida favorita en concreto a través de params
 // Crea el endpoint /foods (GET) para devolver una lista de todas las comidas registradas UNICAS de todos los usuarios
@@ -70,3 +86,33 @@ app.listen(PORT, () => {
 // Crea el endpoint /users/:username/foods (PUT) para obtener una lista de alimentos en req.body, junto con el nombre del usuario por params y añade la lista de dichos alimentos a la lista de comidas favoritas de dicho usuario. Si no se recibe ningún alimento, se eliminan todos los que tienen
 // Crea el endpoint /users/:username/hide (PUT) para recibir el email en req.body y cambiar la visibilidad de ese usuario para que no aparezca si se busca (se entenderá como borrado para el mismo usuario)
 // Crea el endpoint /user/:username (DELETE) para recibir en req.body el email y elimina definitivamente dicho usuario de la lista. Devuelve el usuario borrado. IMPORTANTE! Solo se puede borrar si el campo deleted está a true. Si no, devolverá un error
+
+
+
+
+// app.get('/users/vehicules', (req, res) => {
+//   const { a, b } = req.query
+//   const arrVehicules = [];
+//   for (let j = 0; j < primaryObject.length; j++) {
+//     const numVehicles = primaryObject[j].vehicles
+//     // console.log(numVehicles.length)
+//     console.log(numVehicles.length)
+
+//     if (b <= numVehicles.length && numVehicles.length <= a) {
+//       arrVehicules.push({ user: primaryObject[j] })
+
+//     }
+//     if (arrVehicules.length > 0 && j === primaryObject.length - 1) {
+//       res.send(arrVehicules)
+//       console.log("Llamando a la ruta GET vehicules")
+//     }
+//     // } else {
+//     //   res.send("No se encontro usuario entre los parametros especificados")
+//     // }
+//   }
+// })
+
+
+    // else if (i === primaryObject.length - 1 && primaryObject[num].address.country.split(' ').join('').toLocaleLowerCase() !== param && primaryObject[num].username !== param) {
+    //   res.send("El usuario no existe, comprueba si has escrito bien su nombre")
+    // }
