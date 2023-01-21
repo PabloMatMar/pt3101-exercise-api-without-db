@@ -14,13 +14,16 @@ app.get('/users', (req, res) => {
   console.log("Respondiendo a GET USERS")
 })
 
-app.get('/users/:username', (req, res) => {
+app.get('/users/:search', (req, res) => {
   //cambiar username de req.params por search
-  const param = req.params.username;
+  const param = req.params.search;
   const arrNation = [];
   const arrVehicules = [];
   const arrFood = [];
+  const uniquesFoods = [];
+  const repeatFoods = [];
   let num = 0;
+  // let num2 = 0;
   const { max, min } = req.query
 
   for (let i = 0; i < primaryObject.length; i++) {
@@ -31,7 +34,7 @@ app.get('/users/:username', (req, res) => {
 
     if (primaryObject[i].username === param) {
       res.send(primaryObject[i])
-      num = 1;
+      num = 1
       console.log("Respondiendo a GET UNIC USER")
     }
 
@@ -40,7 +43,7 @@ app.get('/users/:username', (req, res) => {
     else if (i === 0 && param === "total") {
       res.send(`El total de usuarios en el sistema es ${primaryObject.length}`)
       console.log("Respondiendo a GET TOTAL USERS")
-      num = 1;
+      num = 1
     }
 
     //5  Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
@@ -49,29 +52,49 @@ app.get('/users/:username', (req, res) => {
       arrVehicules.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
       if (arrVehicules.length > 0 && i === primaryObject.length - 1) {
         res.send(arrVehicules)
-        num = 1;
+        num = 1
         console.log("respondiendo a GET USERS FOR NUMBER OF VEHICULES")
       }
     }
 
     //6- Crea el endpoint /users/:food (GET) para devolver todos los usuarios con una comida favorita en concreto a través de params
-    function checkFoods() {
+
+    //usar else if(param.typeOf("")) en lugar de la funcion para asi poder eliminar la let num
+    function checkFood() {
       for (let j = 0; j < primaryObject[i].favouritesFood.length; j++) {
         if (param === primaryObject[i].favouritesFood[j].split(' ').join('').toLocaleLowerCase()) {
           arrFood.push(primaryObject[i])
 
         }
-        if (arrFood.length > 0 && i === primaryObject.length - 1) {
+        if (arrFood.length > 0 && i === primaryObject.length - 1 && j === primaryObject[i].favouritesFood.length - 1) {
           res.send(arrFood)
-          num = 1;
+          num = 1
           console.log("Respondiendo a GET FOOD")
           return num
         }
       }
     }
-    checkFoods()
+    checkFood()
 
+    //7- Crea el endpoint /foods (GET) para devolver una lista de todas las comidas registradas UNICAS de todos los usuarios
 
+    if (param === "foods") {
+      for (let c = 0; c < primaryObject[i].favouritesFood.length; c++) {
+        if (uniquesFoods.includes(primaryObject[i].favouritesFood[c])) {
+          const pointSplice = uniquesFoods.indexOf(primaryObject[i].favouritesFood[c])
+          uniquesFoods.splice(pointSplice, pointSplice)
+          repeatFoods.push(primaryObject[i].favouritesFood[c])
+        }
+        if (!repeatFoods.includes(primaryObject[i].favouritesFood[c])) {
+          uniquesFoods.push(primaryObject[i].favouritesFood[c])
+        }
+        if (uniquesFoods.length > 0 && i === primaryObject.length - 1 && c === primaryObject[i].favouritesFood.length - 1) {
+          res.send(uniquesFoods)
+          num = 1
+          console.log("Respondiendo a GET FOODS")
+        }
+      }
+    }
 
     // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
 
@@ -100,12 +123,6 @@ app.listen(PORT, () => {
 
 
 
-
-
-
-
-// Crea el endpoint /users/:food (GET) para devolver todos los usuarios con una comida favorita en concreto a través de params
-// Crea el endpoint /foods (GET) para devolver una lista de todas las comidas registradas UNICAS de todos los usuarios
 // Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarios que tenga, al menos, un coche con los detalles pasados por query string (fuel, manufacturer y/o model. Si están los 3 se filtra por los 3, si falta alguno, se filtra solo por los que existen. Si no hay ninguno, se saca la información de los usuarios que NO TIENEN COCHES)
 // Crea el endpoint /vehicles (GET) para obtener la lista de coches únicos totales, junto con el total de ellos en base al tipo de combustible (recibido por query strings ?fuel=diesel, por ejemplo). Si no se pasa ningún tipo de combustibles, se buscan por todo tipo de combustibles
 // Crea el endpoint /users (POST) para recibir información en req.body para crear un usuario nuevo. Evita que se puedan crear usuarios si no hay, en req.body: email, firstname, lastname y username. Genera el id automáticamente (v4) (paquete uuid, más info en: https://www.npmjs.com/package/uuid). El resto de campos, si no están, crealos vacíos
