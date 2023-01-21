@@ -1,3 +1,4 @@
+//A LA CARGAAAA
 const { randFirstName } = require("@ngneat/falso");
 const express = require("express");
 const app = express();
@@ -18,13 +19,14 @@ app.get('/users/:search', (req, res) => {
   //cambiar username de req.params por search
   const param = req.params.search;
   const arrNation = [];
-  const arrVehicules = [];
+  const arrVehicles = [];
   const arrFood = [];
   const uniquesFoods = [];
   const repeatFoods = [];
+  const usersCars = [];
   let num = 0;
-  // let num2 = 0;
-  const { max, min } = req.query
+  let cont = 0;
+  const { max, min, fuel, manufacturer, model } = req.query
 
   for (let i = 0; i < primaryObject.length; i++) {
     const nation = primaryObject[i].address.country.split(' ').join('')
@@ -48,12 +50,12 @@ app.get('/users/:search', (req, res) => {
 
     //5  Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarioss que tengan un mínimo y un máximo de vehículos (req.query min y max)
 
-    else if (min <= numVehicles.length && numVehicles.length <= max && param === "vehicules" || i === primaryObject.length - 1 && param === "vehicules") {
-      arrVehicules.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
-      if (arrVehicules.length > 0 && i === primaryObject.length - 1) {
-        res.send(arrVehicules)
+    else if (min <= numVehicles.length && numVehicles.length <= max && param === "vehicles" || i === primaryObject.length - 1 && param === "vehicles" && min && max) {
+      arrVehicles.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+      if (arrVehicles.length > 0 && i === primaryObject.length - 1) {
+        res.send(arrVehicles)
         num = 1
-        console.log("respondiendo a GET USERS FOR NUMBER OF VEHICULES")
+        console.log("Respondiendo a GET USERS FOR NUMBER OF VEHICLES")
       }
     }
 
@@ -96,6 +98,34 @@ app.get('/users/:search', (req, res) => {
       }
     }
 
+    //8 - Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarios que tenga, al menos, un coche con los detalles pasados por query string (fuel, manufacturer y/o model. Si están los 3 se filtra por los 3, si falta alguno, se filtra solo por los que existen. Si no hay ninguno, se saca la información de los usuarios que NO TIENEN COCHES)
+
+    if (cont === i && primaryObject[i].vehicles.length === 0) {
+      usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+      cont++
+    }
+    for (let v = 0; v < primaryObject[i].vehicles.length; v++) {
+      if (param === "vehicles") {
+        if (cont === i) {
+          if (fuel === primaryObject[i].vehicles[v].fuel.toLocaleLowerCase() && manufacturer === primaryObject[i].vehicles[v].manufacturer.toLocaleLowerCase() && model === primaryObject[i].vehicles[v].model.toLocaleLowerCase()) {
+            usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+            cont++
+          }
+          else if (fuel === primaryObject[i].vehicles[v].fuel.toLocaleLowerCase() || manufacturer === primaryObject[i].vehicles[v].manufacturer.toLocaleLowerCase() || model === primaryObject[i].vehicles[v].model.toLocaleLowerCase()) {
+            usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+            cont++
+          }
+          else if(cont===i && v === primaryObject[i].vehicles.length-1) {
+            cont++
+          }
+        }
+        if (i === primaryObject.length - 1 && v === primaryObject[i].vehicles.length-1) {
+          res.send(usersCars)
+          num = 1
+        }
+      }
+    }
+
     // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
 
     if (nation.toLowerCase() === param || i === primaryObject.length - 1 && num === 0) {
@@ -105,7 +135,7 @@ app.get('/users/:search', (req, res) => {
       if (i === primaryObject.length - 1) {
         if (arrNation.length > 0) {
           res.send(arrNation)
-          console.log("Respuesta a GET COUNTRY")
+          console.log("Respondiendo a GET COUNTRY")
         }
         else {
           res.send("Busqueda no encontrada o mal realizada.")
@@ -135,21 +165,21 @@ app.listen(PORT, () => {
 
 
 
-// app.get('/users/vehicules', (req, res) => {
+// app.get('/users/vehicles', (req, res) => {
 //   const { a, b } = req.query
-//   const arrVehicules = [];
+//   const arrVehicles = [];
 //   for (let j = 0; j < primaryObject.length; j++) {
 //     const numVehicles = primaryObject[j].vehicles
 //     // console.log(numVehicles.length)
 //     console.log(numVehicles.length)
 
 //     if (b <= numVehicles.length && numVehicles.length <= a) {
-//       arrVehicules.push({ user: primaryObject[j] })
+//       arrVehicles.push({ user: primaryObject[j] })
 
 //     }
-//     if (arrVehicules.length > 0 && j === primaryObject.length - 1) {
-//       res.send(arrVehicules)
-//       console.log("Llamando a la ruta GET vehicules")
+//     if (arrVehicles.length > 0 && j === primaryObject.length - 1) {
+//       res.send(arrVehicles)
+//       console.log("Llamando a la ruta GET vehicles")
 //     }
 //     // } else {
 //     //   res.send("No se encontro usuario entre los parametros especificados")
