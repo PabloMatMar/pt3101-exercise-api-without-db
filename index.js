@@ -3,10 +3,13 @@ const { randFirstName } = require("@ngneat/falso");
 const express = require("express");
 const app = express();
 const primaryObject = require('./original/users_original.json')
+const { v4: uuidv4 } = require('uuid');
+uuidv4();
 
 const PORT = 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // 1- Crea el endpoint /users (GET) que devuelva todos los usuarios
 
@@ -176,10 +179,39 @@ app.get('/vehicles', (req, res) => {
       }
       else if (i === primaryObject.length - 1 && c === primaryObject[i].vehicles[c].length - 1) {
         res.send("Busqueda no encontrada o mal realizada.")
+        console.log("Respondiendo con RESPUESTA NO ENCONTRADA")
 
       }
     }
   }
+})
+
+// Crea el endpoint /users (POST) para recibir información en req.body para crear un usuario nuevo. Evita que se puedan crear usuarios si no hay, en req.body: email, firstname, lastname y username. Genera el id automáticamente (v4) (paquete uuid, más info en: https://www.npmjs.com/package/uuid). El resto de campos, si no están, crealos vacíos
+
+app.post('/users', (req, res) => {
+  function createUsers() {
+    const { email, firstName, lastName, phone, imagen, username, address, vehicles, favouritesFood } = req.body
+    const newUser = {
+      id: uuidv4(),
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone || "",
+      img: imagen || "",
+      username: username,
+      address: address || {},
+      vehicles: vehicles || [],
+      favouritesFood: favouritesFood | [],
+      deleted: false
+    }
+    if (email && firstName && lastName && username) {
+    return (newUser)
+    } else {
+      return ("Se requieren campos")
+    }
+  }
+  const data = createUsers()
+  res.json(data)
 })
 
 
@@ -189,7 +221,10 @@ app.listen(PORT, () => {
 
 
 
-// Crea el endpoint /users (POST) para recibir información en req.body para crear un usuario nuevo. Evita que se puedan crear usuarios si no hay, en req.body: email, firstname, lastname y username. Genera el id automáticamente (v4) (paquete uuid, más info en: https://www.npmjs.com/package/uuid). El resto de campos, si no están, crealos vacíos
+
+
+
+
 // Crea el endpoint /users/:username (PUT) para obtener información del usuario a través de req.body (menos el id, los vehículos, los alimentos y el campo deleted) y actualiza dicho usuario
 // Crea el endpoint /users/:username/vehicles (PUT) para obtener una lista de vehículos en req.body (puede ser uno o muchos. Si no es ninguno, que no haga nada) y añádelos a los existentes del usuario específico (usuario a través de params)
 // Crea el endpoint /users/:username/foods (PUT) para obtener una lista de alimentos en req.body, junto con el nombre del usuario por params y añade la lista de dichos alimentos a la lista de comidas favoritas de dicho usuario. Si no se recibe ningún alimento, se eliminan todos los que tienen
