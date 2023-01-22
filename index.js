@@ -201,19 +201,50 @@ app.post('/users', (req, res) => {
       username: username,
       address: address || {},
       vehicles: vehicles || [],
-      favouritesFood: favouritesFood | [],
+      favouritesFood: favouritesFood || [],
       deleted: false
     }
     if (email && firstName && lastName && username) {
-    return (newUser)
+      primaryObject.push(newUser)
+      return (primaryObject)
     } else {
       return ("Se requieren campos")
     }
   }
   const data = createUsers()
   res.json(data)
+  console.log("Respondiendo a POST USERS")
 })
 
+//11 - Crea el endpoint /users/:username (PUT) para obtener información del usuario a través de req.body (menos el id, los vehículos, los alimentos y el campo deleted) y actualiza dicho usuario
+app.put('/users/:username', (req, res) => {
+  let num = 0;
+  for (let i = 0; i < primaryObject.length; i++) {
+    const param = req.params.username;
+    const { email, firstName, lastName, phone, img, username, address } = req.body;
+    // console.log("*****")
+    // console.log(primaryObject[0].username.toString())
+    // console.log(req.params.username)
+    // console.log("*****")
+    if (param === primaryObject[i].username.toString()) {
+      primaryObject[i].email = email;
+      primaryObject[i].firstName = firstName;
+      primaryObject[i].lastName = lastName;
+      primaryObject[i].phone = phone;
+      primaryObject[i].img = img;
+      primaryObject[i].username = username;
+      primaryObject[i].address = address;
+      res.json(primaryObject[i])
+      console.log("Respondiendo a PUT USERNAME")
+      num = 1;
+
+    }
+    if (i === primaryObject.length - 1 && num === 0) {
+      res.json("Usuario a actualizar no encontrado")
+      console.log("Respondiendo a PUT USERNAME ")
+    }
+  }
+})
 
 app.listen(PORT, () => {
   console.info(`> Estoy arribísima en el puerto ${PORT}! ✨🦄`);
@@ -222,10 +253,6 @@ app.listen(PORT, () => {
 
 
 
-
-
-
-// Crea el endpoint /users/:username (PUT) para obtener información del usuario a través de req.body (menos el id, los vehículos, los alimentos y el campo deleted) y actualiza dicho usuario
 // Crea el endpoint /users/:username/vehicles (PUT) para obtener una lista de vehículos en req.body (puede ser uno o muchos. Si no es ninguno, que no haga nada) y añádelos a los existentes del usuario específico (usuario a través de params)
 // Crea el endpoint /users/:username/foods (PUT) para obtener una lista de alimentos en req.body, junto con el nombre del usuario por params y añade la lista de dichos alimentos a la lista de comidas favoritas de dicho usuario. Si no se recibe ningún alimento, se eliminan todos los que tienen
 // Crea el endpoint /users/:username/hide (PUT) para recibir el email en req.body y cambiar la visibilidad de ese usuario para que no aparezca si se busca (se entenderá como borrado para el mismo usuario)
