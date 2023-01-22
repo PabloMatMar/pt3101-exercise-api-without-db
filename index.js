@@ -265,12 +265,16 @@ app.put('/users/:username/vehicles', (req, res) => {
         if (j === body.length - 1) {
           res.json(primaryObject[i])
           console.log("Respondiendo a PUT USERNAME")
-          num = 1;primaryObject[i].remove()
+          num = 1;
         }
 
 
         if (i === primaryObject.length - 1 && num === 0) {
           res.json("Usuario a actualizar no encontrado")
+          console.log("Respuesta vacia a PUT USERNAME/VEHICLES ")
+        }
+        if (i === 0 && body.length === 0){
+          res.json("No has pasado ningun vehiculo")
           console.log("Respuesta vacia a PUT USERNAME/VEHICLES ")
         }
       }
