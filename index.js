@@ -246,6 +246,42 @@ app.put('/users/:username', (req, res) => {
   }
 })
 
+// Crea el endpoint /users/:username/vehicles (PUT) para obtener una lista de vehículos en req.body (puede ser uno o muchos. Si no es ninguno, que no haga nada) y añádelos a los existentes del usuario específico (usuario a través de params)
+
+app.put('/users/:username/vehicles', (req, res) => {
+  let num = 0;
+  for (let i = 0; i < primaryObject.length; i++) {
+    const param = req.params.username;
+    const body = req.body;
+    if (param === primaryObject[i].username.toString()) {
+      for (let j = 0; j < body.length; j++) {
+
+        const allVehicles = primaryObject[i].vehicles
+        const newVehicle = {
+          fuel: body[j].fuel,
+          manufacturer: body[j].manufacturer,
+          model: body[j].model,
+          car: body[j].car,
+          type: body[j].type
+        }
+
+        allVehicles.push(newVehicle)
+        if(j === body.length-1) {
+        res.json(primaryObject[i])
+        console.log("Respondiendo a PUT USERNAME")
+        num = 1;
+        }
+
+
+        if (i === primaryObject.length - 1 && num === 0) {
+          res.json("Usuario a actualizar no encontrado")
+          console.log("Respondiendo a PUT USERNAME ")
+        }
+      }
+    }
+  }
+})
+
 app.listen(PORT, () => {
   console.info(`> Estoy arribísima en el puerto ${PORT}! ✨🦄`);
 });
