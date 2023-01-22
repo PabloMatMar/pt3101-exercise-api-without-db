@@ -23,7 +23,7 @@ app.get('/users/:search', (req, res) => {
   const arrFood = [];
   const uniquesFoods = [];
   const repeatFoods = [];
-  const usersCars = [];
+  let usersCars = [];
   let num = 0;
   let cont = 0;
   const { max, min, fuel, manufacturer, model } = req.query
@@ -100,31 +100,35 @@ app.get('/users/:search', (req, res) => {
 
     //8 - Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarios que tenga, al menos, un coche con los detalles pasados por query string (fuel, manufacturer y/o model. Si están los 3 se filtra por los 3, si falta alguno, se filtra solo por los que existen. Si no hay ninguno, se saca la información de los usuarios que NO TIENEN COCHES)
 
-    if (cont === i && primaryObject[i].vehicles.length === 0) {
-      usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
-      cont++
-    }
-    for (let v = 0; v < primaryObject[i].vehicles.length; v++) {
-      if (param === "vehicles") {
+    if (param === "vehicles" && fuel || manufacturer || model) {
+      if (cont === i && primaryObject[i].vehicles.length === 0) {
+        usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
+        cont++
+      }
+      for (let v = 0; v < primaryObject[i].vehicles.length; v++) {
         if (cont === i) {
-          if (fuel === primaryObject[i].vehicles[v].fuel.toLocaleLowerCase() && manufacturer === primaryObject[i].vehicles[v].manufacturer.toLocaleLowerCase() && model === primaryObject[i].vehicles[v].model.toLocaleLowerCase()) {
+          if (fuel === primaryObject[i].vehicles[v].fuel.split(' ').join('') && manufacturer === primaryObject[i].vehicles[v].manufacturer.split(' ').join('') && model === primaryObject[i].vehicles[v].model.split(' ').join('')) {
+
             usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
             cont++
           }
-          else if (fuel === primaryObject[i].vehicles[v].fuel.toLocaleLowerCase() || manufacturer === primaryObject[i].vehicles[v].manufacturer.toLocaleLowerCase() || model === primaryObject[i].vehicles[v].model.toLocaleLowerCase()) {
+          else if (fuel === primaryObject[i].vehicles[v].fuel.split(' ').join('') || manufacturer === primaryObject[i].vehicles[v].manufacturer.split(' ').join('') || model === primaryObject[i].vehicles[v].model.split(' ').join('')) {
             usersCars.push({ username: primaryObject[i].username, email: primaryObject[i].email, img: primaryObject[i].img })
             cont++
           }
-          else if(cont===i && v === primaryObject[i].vehicles.length-1) {
+          else if (cont === i && v === primaryObject[i].vehicles.length - 1) {
             cont++
           }
         }
-        if (i === primaryObject.length - 1 && v === primaryObject[i].vehicles.length-1) {
+        if (i === primaryObject.length - 1 && v === primaryObject[i].vehicles.length - 1) {
           res.send(usersCars)
+          console.log("Respondiendo a GET USER FOR PARAMS OF HIS CARS")
           num = 1
         }
       }
     }
+
+
 
     // 4- Crea el endpoint /users/:country (GET) para devolver todos los usuarios de un país en concreto recibido por params
 
@@ -146,15 +150,45 @@ app.get('/users/:search', (req, res) => {
   }
 })
 
+
+//9- Crea el endpoint /vehicles (GET) para obtener la lista de coches únicos totales, junto con el total de ellos en base al tipo de combustible (recibido por query strings ?fuel=diesel, por ejemplo). Si no se pasa ningún tipo de combustibles, se buscan por todo tipo de combustibles
+
+app.get('/vehicles', (req, res) => {
+
+  const uniquesVehicles = []
+  const repeatVehicles = []
+  const { fuel } = req.query
+  for (let i = 0; i < primaryObject.length; i++) {
+    for (let c = 0; c < primaryObject[i].vehicles.length; c++) {
+      if (fuel === primaryObject[i].vehicles[c].fuel || !fuel) {
+        if (uniquesVehicles.includes(primaryObject[i].vehicles[c])) {
+          const pointSplice = uniquesVehicles.indexOf(primaryObject[i].vehicles[c])
+          uniquesVehicles.splice(pointSplice, pointSplice)
+          repeatVehicles.push(primaryObject[i].vehicles[c])
+        }
+        if (!repeatVehicles.includes(primaryObject[i].vehicles[c])) {
+          uniquesVehicles.push(primaryObject[i].vehicles[c])
+        }
+      }
+      if (uniquesVehicles.length > 0 && i === primaryObject.length - 1 && c === primaryObject[i].vehicles.length - 1) {
+        res.send(uniquesVehicles)
+        console.log("Respondiendo a GET VEHICLES")
+      }
+      else if (i === primaryObject.length - 1 && c === primaryObject[i].vehicles[c].length - 1) {
+        res.send("Busqueda no encontrada o mal realizada.")
+
+      }
+    }
+  }
+})
+
+
 app.listen(PORT, () => {
   console.info(`> Estoy arribísima en el puerto ${PORT}! ✨🦄`);
 });
 
 
 
-
-// Crea el endpoint /users/vehicles (GET) para obtener email, username e imagen de los usuarios que tenga, al menos, un coche con los detalles pasados por query string (fuel, manufacturer y/o model. Si están los 3 se filtra por los 3, si falta alguno, se filtra solo por los que existen. Si no hay ninguno, se saca la información de los usuarios que NO TIENEN COCHES)
-// Crea el endpoint /vehicles (GET) para obtener la lista de coches únicos totales, junto con el total de ellos en base al tipo de combustible (recibido por query strings ?fuel=diesel, por ejemplo). Si no se pasa ningún tipo de combustibles, se buscan por todo tipo de combustibles
 // Crea el endpoint /users (POST) para recibir información en req.body para crear un usuario nuevo. Evita que se puedan crear usuarios si no hay, en req.body: email, firstname, lastname y username. Genera el id automáticamente (v4) (paquete uuid, más info en: https://www.npmjs.com/package/uuid). El resto de campos, si no están, crealos vacíos
 // Crea el endpoint /users/:username (PUT) para obtener información del usuario a través de req.body (menos el id, los vehículos, los alimentos y el campo deleted) y actualiza dicho usuario
 // Crea el endpoint /users/:username/vehicles (PUT) para obtener una lista de vehículos en req.body (puede ser uno o muchos. Si no es ninguno, que no haga nada) y añádelos a los existentes del usuario específico (usuario a través de params)
