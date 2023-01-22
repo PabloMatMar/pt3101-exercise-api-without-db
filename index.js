@@ -166,7 +166,7 @@ app.get('/vehicles', (req, res) => {
       if (fuel === primaryObject[i].vehicles[c].fuel || !fuel) {
         if (uniquesVehicles.includes(primaryObject[i].vehicles[c])) {
           const pointSplice = uniquesVehicles.indexOf(primaryObject[i].vehicles[c])
-          uniquesVehicles.splice(pointSplice, pointSplice)
+          uniquesVehicles.splice(pointSplice, 1)
           repeatVehicles.push(primaryObject[i].vehicles[c])
         }
         if (!repeatVehicles.includes(primaryObject[i].vehicles[c])) {
@@ -222,10 +222,6 @@ app.put('/users/:username', (req, res) => {
   for (let i = 0; i < primaryObject.length; i++) {
     const param = req.params.username;
     const { email, firstName, lastName, phone, img, username, address } = req.body;
-    // console.log("*****")
-    // console.log(primaryObject[0].username.toString())
-    // console.log(req.params.username)
-    // console.log("*****")
     if (param === primaryObject[i].username.toString()) {
       primaryObject[i].email = email;
       primaryObject[i].firstName = firstName;
@@ -241,7 +237,7 @@ app.put('/users/:username', (req, res) => {
     }
     if (i === primaryObject.length - 1 && num === 0) {
       res.json("Usuario a actualizar no encontrado")
-      console.log("Respondiendo a PUT USERNAME ")
+      console.log("Respuesta vacia a PUT USERNAME ")
     }
   }
 })
@@ -266,16 +262,20 @@ app.put('/users/:username/vehicles', (req, res) => {
         }
 
         allVehicles.push(newVehicle)
-        if(j === body.length-1) {
-        res.json(primaryObject[i])
-        console.log("Respondiendo a PUT USERNAME")
-        num = 1;
+        if (j === body.length - 1) {
+          res.json(primaryObject[i])
+          console.log("Respondiendo a PUT USERNAME")
+          num = 1;
         }
 
 
         if (i === primaryObject.length - 1 && num === 0) {
           res.json("Usuario a actualizar no encontrado")
-          console.log("Respondiendo a PUT USERNAME/VEHICLES ")
+          console.log("Respuesta vacia a PUT USERNAME/VEHICLES ")
+        }
+        if (i === 0 && body.length === 0){
+          res.json("No has pasado ningun vehiculo")
+          console.log("Respuesta vacia a PUT USERNAME/VEHICLES ")
         }
       }
     }
@@ -289,7 +289,7 @@ app.put('/users/:username/foods', (req, res) => {
   for (let i = 0; i < primaryObject.length; i++) {
     const param = req.params.username;
     const body = req.body;
-    if (body.length === 0 && param === primaryObject[i].username.toString() ) {
+    if (body.length === 0 && param === primaryObject[i].username.toString()) {
 
       primaryObject[i].favouritesFood = []
       res.json(primaryObject[i])
@@ -301,21 +301,68 @@ app.put('/users/:username/foods', (req, res) => {
 
         const allFoods = primaryObject[i].favouritesFood
         allFoods.push(body[j])
-        if(j === body.length-1) {
-        res.json(primaryObject[i])
-        console.log("Respondiendo a PUT USERNAME/FOODS")
-        num = 1;
+        if (j === body.length - 1) {
+          res.json(primaryObject[i])
+          console.log("Respondiendo a PUT USERNAME/FOODS")
+          num = 1;
         }
 
 
         if (i === primaryObject.length - 1 && num === 0) {
           res.json("Usuario a actualizar no encontrado")
-          console.log("Respondiendo a PUT USERNAME ")
+          console.log("Respuesta vacia a PUT USERNAME/FOODS")
         }
       }
     }
   }
 })
+
+// Crea el endpoint /users/:username/hide (PUT) para recibir el email en req.body y cambiar la visibilidad de ese usuario para que no aparezca si se busca (se entenderá como borrado para el mismo usuario)
+
+app.put('/users/:username/hide', (req, res) => {
+  num = 0;
+  for (let i = 0; i < primaryObject.length; i++) {
+    const param = req.params.username;
+    const { email } = req.body;
+    if (primaryObject[i].username.toString() === param && email === primaryObject[i].email.toString()) {
+      primaryObject[i].deleted = true
+      num = 1;
+      res.json("Usuario ocultado")
+      console.log("Respondiendo a PUT USERNAME/HIDE")
+    }
+
+    if (i === primaryObject.length - 1 && num === 0) {
+      res.json("Usuario a actualizar no encontrado")
+      console.log("Respuesta vacia a PUT USERNAME/HIDE")
+    }
+  }
+})
+
+//15- Crea el endpoint /user/:username (DELETE) para recibir en req.body el email y elimina definitivamente dicho usuario de la lista. Devuelve el usuario borrado. IMPORTANTE! Solo se puede borrar si el campo deleted está a true. Si no, devolverá un error
+
+app.delete('/user/:username', (req, res) => {
+  console.log("dsadasdas")
+  num = 0;
+  for (let i = 0; i < primaryObject.length; i++) {
+    const param = req.params.username;
+    const { email } = req.body;
+    if (primaryObject[i].username.toString() === param && email === primaryObject[i].email.toString()) {
+      primaryObject[i].deleted = true
+      console.log("dnskjdkasd")
+      num = 1;
+      primaryObject.splice(i,1)
+      res.json("Usuario eliminado")
+      console.log("Respondiendo a DELETE USERNAME/HIDE")
+    }
+
+    if (i === primaryObject.length - 1 && num === 0) {
+      res.json("Usuario a eliminar no encontrado")
+      console.log("Respuesta vacia a DELETE USERNAME/HIDE")
+    }
+  }
+
+})
+
 
 app.listen(PORT, () => {
   console.info(`> Estoy arribísima en el puerto ${PORT}! ✨🦄`);
