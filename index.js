@@ -275,6 +275,41 @@ app.put('/users/:username/vehicles', (req, res) => {
 
         if (i === primaryObject.length - 1 && num === 0) {
           res.json("Usuario a actualizar no encontrado")
+          console.log("Respondiendo a PUT USERNAME/VEHICLES ")
+        }
+      }
+    }
+  }
+})
+
+//13- Crea el endpoint /users/:username/foods (PUT) para obtener una lista de alimentos en req.body, junto con el nombre del usuario por params y añade la lista de dichos alimentos a la lista de comidas favoritas de dicho usuario. Si no se recibe ningún alimento, se eliminan todos los que tienen
+
+app.put('/users/:username/foods', (req, res) => {
+  let num = 0;
+  for (let i = 0; i < primaryObject.length; i++) {
+    const param = req.params.username;
+    const body = req.body;
+    if (body.length === 0 && param === primaryObject[i].username.toString() ) {
+
+      primaryObject[i].favouritesFood = []
+      res.json(primaryObject[i])
+      console.log("Respondiendo a PUT USERNAME/FOODS")
+      num = 1;
+    }
+    if (param === primaryObject[i].username.toString()) {
+      for (let j = 0; j < body.length; j++) {
+
+        const allFoods = primaryObject[i].favouritesFood
+        allFoods.push(body[j])
+        if(j === body.length-1) {
+        res.json(primaryObject[i])
+        console.log("Respondiendo a PUT USERNAME/FOODS")
+        num = 1;
+        }
+
+
+        if (i === primaryObject.length - 1 && num === 0) {
+          res.json("Usuario a actualizar no encontrado")
           console.log("Respondiendo a PUT USERNAME ")
         }
       }
@@ -287,10 +322,6 @@ app.listen(PORT, () => {
 });
 
 
-
-
-// Crea el endpoint /users/:username/vehicles (PUT) para obtener una lista de vehículos en req.body (puede ser uno o muchos. Si no es ninguno, que no haga nada) y añádelos a los existentes del usuario específico (usuario a través de params)
-// Crea el endpoint /users/:username/foods (PUT) para obtener una lista de alimentos en req.body, junto con el nombre del usuario por params y añade la lista de dichos alimentos a la lista de comidas favoritas de dicho usuario. Si no se recibe ningún alimento, se eliminan todos los que tienen
 // Crea el endpoint /users/:username/hide (PUT) para recibir el email en req.body y cambiar la visibilidad de ese usuario para que no aparezca si se busca (se entenderá como borrado para el mismo usuario)
 // Crea el endpoint /user/:username (DELETE) para recibir en req.body el email y elimina definitivamente dicho usuario de la lista. Devuelve el usuario borrado. IMPORTANTE! Solo se puede borrar si el campo deleted está a true. Si no, devolverá un error
 
